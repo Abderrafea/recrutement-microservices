@@ -1,0 +1,260 @@
+version: '3.8'
+
+services:
+  postgres-users:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: users_db
+      POSTGRES_USER: recruit
+      POSTGRES_PASSWORD: recruit123
+    ports:
+      - "5432:5432"
+    volumes:
+      - users_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recruit -d users_db"]
+      interval: 10s
+      retries: 5
+
+  postgres-jobs:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: jobs_db
+      POSTGRES_USER: recruit
+      POSTGRES_PASSWORD: recruit123
+    ports:
+      - "5433:5432"
+    volumes:
+      - jobs_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recruit -d jobs_db"]
+      interval: 10s
+      retries: 5
+
+  postgres-applications:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: applications_db
+      POSTGRES_USER: recruit
+      POSTGRES_PASSWORD: recruit123
+    ports:
+      - "5434:5432"
+    volumes:
+      - apps_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recruit -d applications_db"]
+      interval: 10s
+      retries: 5
+
+  postgres-reporting:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: reporting_db
+      POSTGRES_USER: recruit
+      POSTGRES_PASSWORD: recruit123
+    ports:
+      - "5435:5432"
+    volumes:
+      - reporting_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recruit -d reporting_db"]
+      interval: 10s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: recruit
+      RABBITMQ_DEFAULT_PASS: recruit123
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      retries: 5
+
+  config-server:
+    build: ./config-server/config-server
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+
+  discovery-service:
+    build: ./discovery-service/discovery-service
+    ports:
+      - "8761:8761"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+
+  user-service:
+    build: ./user-service/user-service
+    ports:
+      - "8081:8081"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_DEFAULT_ZONE: http://discovery-service:8761/eureka/
+      USER_DB_HOST: postgres-users
+      CV_STORAGE_DIR: /data/cv
+    volumes:
+      - user_cv_data:/data/cv
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      postgres-users:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+
+  job-service:
+    build: ./job-service/job-service
+    ports:
+      - "8082:8082"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_DEFAULT_ZONE: http://discovery-service:8761/eureka/
+      JOB_DB_HOST: postgres-jobs
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      postgres-jobs:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+
+  application-service:
+    build: ./application-service/application-service
+    ports:
+      - "8083:8083"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_DEFAULT_ZONE: http://discovery-service:8761/eureka/
+      APPLICATION_DB_HOST: postgres-applications
+      RABBITMQ_HOST: rabbitmq
+      USER_SERVICE_URL: http://user-service:8081
+      JOB_SERVICE_URL: http://job-service:8082
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      postgres-applications:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+
+  notification-service:
+    build: ./notification-service/notification-service
+    ports:
+      - "8084:8084"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_DEFAULT_ZONE: http://discovery-service:8761/eureka/
+      RABBITMQ_HOST: rabbitmq
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+
+  reporting-service:
+    build: ./reporting-service/reporting-service
+    ports:
+      - "8085:8085"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_DEFAULT_ZONE: http://discovery-service:8761/eureka/
+      REPORTING_DB_HOST: postgres-reporting
+      USER_SERVICE_URL: http://user-service:8081
+      JOB_SERVICE_URL: http://job-service:8082
+      APPLICATION_SERVICE_URL: http://application-service:8083
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      postgres-reporting:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+
+  api-gateway:
+    build: ./api-gateway/api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_DEFAULT_ZONE: http://discovery-service:8761/eureka/
+      USER_SERVICE_JWKS_URI: http://user-service:8081/api/users/.well-known/jwks.json
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      job-service:
+        condition: service_healthy
+      application-service:
+        condition: service_healthy
+      reporting-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+
+  frontend-app:
+    build: ./frontend-app
+    ports:
+      - "80:80"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+
+volumes:
+  users_data:
+  jobs_data:
+  apps_data:
+  reporting_data:
+  user_cv_data:
