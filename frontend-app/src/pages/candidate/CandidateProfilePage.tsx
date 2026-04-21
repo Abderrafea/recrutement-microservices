@@ -15,14 +15,16 @@ export function CandidateProfilePage() {
     queryKey: ['auth', 'me'],
     queryFn: getCurrentUser,
   });
+  const candidateProfile =
+    profileQuery.data?.profile && 'skills' in profileQuery.data.profile ? profileQuery.data.profile : undefined;
   const form = useForm({
     values: {
       firstName: profileQuery.data?.firstName ?? '',
       lastName: profileQuery.data?.lastName ?? '',
-      phone: 'phone' in (profileQuery.data?.profile ?? {}) ? profileQuery.data?.profile?.phone ?? '' : '',
-      address: 'address' in (profileQuery.data?.profile ?? {}) ? profileQuery.data?.profile?.address ?? '' : '',
-      summary: 'summary' in (profileQuery.data?.profile ?? {}) ? profileQuery.data?.profile?.summary ?? '' : '',
-      skills: 'skills' in (profileQuery.data?.profile ?? {}) ? profileQuery.data?.profile?.skills?.join(', ') ?? '' : '',
+      phone: candidateProfile?.phone ?? '',
+      address: candidateProfile?.address ?? '',
+      summary: candidateProfile?.summary ?? '',
+      skills: candidateProfile?.skills?.join(', ') ?? '',
     },
   });
 
