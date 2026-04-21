@@ -1,0 +1,40 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${USER_DB_HOST:postgres-users}:${USER_DB_PORT:5432}/users_db
+    username: ${USER_DB_USERNAME:recruit}
+    password: ${USER_DB_PASSWORD:recruit123}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+jwt:
+  private-key-path: ${JWT_PRIVATE_KEY_PATH:classpath:keys/private.pem}
+  public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:keys/public.pem}
+  expiration: ${JWT_EXPIRATION_MS:86400000}
+
+storage:
+  cv-directory: ${CV_STORAGE_DIR:uploads/cv}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://discovery-service:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

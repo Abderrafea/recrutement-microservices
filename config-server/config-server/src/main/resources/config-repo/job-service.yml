@@ -1,0 +1,36 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${JOB_DB_HOST:postgres-jobs}:${JOB_DB_PORT:5432}/jobs_db
+    username: ${JOB_DB_USERNAME:recruit}
+    password: ${JOB_DB_PASSWORD:recruit123}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${USER_SERVICE_JWKS_URI:http://user-service:8081/api/users/.well-known/jwks.json}
+
+services:
+  user-service-url: ${USER_SERVICE_URL:http://user-service:8081}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://discovery-service:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

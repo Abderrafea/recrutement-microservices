@@ -1,0 +1,50 @@
+server:
+  port: ${SERVER_PORT:8083}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${APPLICATION_DB_HOST:postgres-applications}:${APPLICATION_DB_PORT:5432}/applications_db
+    username: ${APPLICATION_DB_USERNAME:recruit}
+    password: ${APPLICATION_DB_PASSWORD:recruit123}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:recruit}
+    password: ${RABBITMQ_PASSWORD:recruit123}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${USER_SERVICE_JWKS_URI:http://user-service:8081/api/users/.well-known/jwks.json}
+
+services:
+  job-service-url: ${JOB_SERVICE_URL:http://job-service:8082}
+  user-service-url: ${USER_SERVICE_URL:http://user-service:8081}
+
+messaging:
+  recruitment:
+    exchange: recruitment.events
+    routing-keys:
+      application-created: application.created
+      application-status-changed: application.status.changed
+      interview-reminder: interview.reminder
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://discovery-service:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

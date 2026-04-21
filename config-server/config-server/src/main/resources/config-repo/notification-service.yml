@@ -1,0 +1,45 @@
+server:
+  port: ${SERVER_PORT:8084}
+
+spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:recruit}
+    password: ${RABBITMQ_PASSWORD:recruit123}
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${USER_SERVICE_JWKS_URI:http://user-service:8081/api/users/.well-known/jwks.json}
+
+messaging:
+  recruitment:
+    exchange: recruitment.events
+    queues:
+      application-created: notification.application.created
+      application-status: notification.application.status
+      interview-reminder: notification.interview.reminder
+    routing-keys:
+      application-created: application.created
+      application-status-changed: application.status.changed
+      interview-reminder: interview.reminder
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://discovery-service:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Application received</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#1f2937;">
+<table role="presentation" width="100%" style="padding:32px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="620" style="background:#ffffff;border-radius:20px;padding:32px;box-shadow:0 16px 40px rgba(15,23,42,0.08);">
+                <tr>
+                    <td>
+                        <div style="font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#2563eb;font-weight:700;">Recruitment Platform</div>
+                        <h1 style="margin:16px 0 12px;font-size:30px;line-height:1.2;">Your application is in.</h1>
+                        <p style="font-size:16px;line-height:1.7;margin:0 0 18px;">Hi <strong th:text="${candidateName}">Candidate</strong>, we received your application for <strong th:text="${jobTitle}">Job Title</strong> at <strong th:text="${company}">Company</strong>.</p>
+                        <p style="font-size:16px;line-height:1.7;margin:0;">Our team will keep you posted as the hiring process moves forward.</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

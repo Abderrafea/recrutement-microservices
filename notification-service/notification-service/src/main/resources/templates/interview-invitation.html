@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Interview invitation</title>
+</head>
+<body style="margin:0;padding:0;background:#fff7ed;font-family:Arial,sans-serif;color:#7c2d12;">
+<table role="presentation" width="100%" style="padding:32px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="620" style="background:#ffffff;border-radius:20px;padding:32px;box-shadow:0 18px 44px rgba(124,45,18,0.10);">
+                <tr>
+                    <td>
+                        <div style="display:inline-block;padding:8px 14px;border-radius:999px;background:#ffedd5;color:#c2410c;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Interview</div>
+                        <h1 style="margin:16px 0 12px;font-size:30px;color:#9a3412;">You have been invited to interview.</h1>
+                        <p style="font-size:16px;line-height:1.7;margin:0 0 18px;">Great news. You have been selected for an interview for <strong th:text="${jobTitle}">Job Title</strong> at <strong th:text="${company}">Company</strong>.</p>
+                        <p style="font-size:15px;line-height:1.7;margin:0;">The employer will contact you with the next scheduling details soon.</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
