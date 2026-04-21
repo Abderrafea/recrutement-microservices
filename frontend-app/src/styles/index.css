@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #10212b;
+  background: #faf7f1;
+  font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background-image: radial-gradient(circle at top left, rgba(201, 105, 77, 0.18), transparent 28%),
+    radial-gradient(circle at top right, rgba(15, 125, 130, 0.18), transparent 22%),
+    linear-gradient(160deg, #fbf7ef 0%, #ede7db 100%);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.glass-panel {
+  backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.section-grid {
+  background-image: linear-gradient(rgba(16, 33, 43, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 33, 43, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.fade-rise {
+  animation: fade-rise 0.5s ease both;
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
