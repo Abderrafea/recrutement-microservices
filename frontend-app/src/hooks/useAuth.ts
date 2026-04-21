@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useAuthStore } from '../store/authStore';
 
 export function useAuth() {
@@ -6,13 +5,10 @@ export function useAuth() {
   const token = useAuthStore((state) => state.token);
   const logout = useAuthStore((state) => state.logout);
 
-  return useMemo(
-    () => ({
-      user,
-      token,
-      logout,
-      isAuthenticated: Boolean(user && token),
-    }),
-    [logout, token, user],
-  );
+  return {
+    user,
+    token,
+    logout,
+    isAuthenticated: Boolean(user && token),
+  };
 }

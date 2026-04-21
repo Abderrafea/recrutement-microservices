@@ -1,0 +1,32 @@
+import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { useNavigate, useParams } from 'react-router-dom';
+import { updateJob } from '../../api/jobs.api';
+import { JobForm } from '../../components/jobs/JobForm';
+import { Spinner } from '../../components/common/Spinner';
+import { AppShell } from '../../components/layout/AppShell';
+import { useJob } from '../../hooks/useJobs';
+
+export function EditJobPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const jobQuery = useJob(id);
+  const updateMutation = useMutation({
+    mutationFn: (payload: Parameters<typeof updateJob>[1]) => updateJob(id!, payload),
+    onSuccess: () => {
+      toast.success('Job updated.');
+      navigate('/employer/jobs');
+    },
+    onError: () => toast.error('Unable to update the job.'),
+  });
+
+  return (
+    <AppShell eyebrow="Employer command center" title="Edit role details">
+      {jobQuery.isLoading || !jobQuery.data ? (
+        <Spinner />
+      ) : (
+        <JobForm defaultValues={jobQuery.data} isSubmitting={updateMutation.isPending} onSubmit={(payload) => updateMutation.mutate(payload)} />
+      )}
+    </AppShell>
+  );
+}
