@@ -34,7 +34,7 @@ export function JobCard({ job, compact }: { job: JobOffer; compact?: boolean }) 
           to={`/jobs/${job.id}`}
           className="inline-flex items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
         >
-          View
+          Voir
         </Link>
       </div>
     </Panel>

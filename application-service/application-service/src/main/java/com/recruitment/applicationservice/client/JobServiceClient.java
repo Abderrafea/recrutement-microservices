@@ -30,10 +30,9 @@ public class JobServiceClient {
     public void adjustApplicationCount(Long jobId, int delta) {
         webClientBuilder.build()
                 .patch()
-                .uri(uriBuilder -> uriBuilder
-                        .path(serviceClientsProperties.jobServiceUrl() + "/api/jobs/internal/{id}/application-count")
-                        .queryParam("delta", delta)
-                        .build(jobId))
+                .uri(serviceClientsProperties.jobServiceUrl() + "/api/jobs/internal/{id}/application-count?delta={delta}",
+                        jobId,
+                        delta)
                 .retrieve()
                 .toBodilessEntity()
                 .block();

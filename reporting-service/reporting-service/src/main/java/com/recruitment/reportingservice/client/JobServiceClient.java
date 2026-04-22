@@ -26,10 +26,8 @@ public class JobServiceClient {
                     .block();
         }
         return client.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(serviceClientsProperties.jobServiceUrl() + "/api/jobs/internal/all")
-                        .queryParam("employerId", employerId)
-                        .build())
+                .uri(serviceClientsProperties.jobServiceUrl() + "/api/jobs/internal/all?employerId={employerId}",
+                        employerId)
                 .retrieve()
                 .bodyToFlux(JobSnapshot.class)
                 .collectList()

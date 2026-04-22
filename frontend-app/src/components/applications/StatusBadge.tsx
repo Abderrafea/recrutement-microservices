@@ -9,6 +9,14 @@ const styles: Record<Application['status'], string> = {
   REJECTED: 'bg-rose-100 text-rose-700',
 };
 
+const labels: Record<Application['status'], string> = {
+  PENDING: 'En attente',
+  REVIEWED: 'Examinée',
+  INTERVIEW: 'Entretien',
+  ACCEPTED: 'Acceptée',
+  REJECTED: 'Refusée',
+};
+
 export function StatusBadge({ status }: { status: Application['status'] }) {
-  return <Badge className={styles[status]}>{status}</Badge>;
+  return <Badge className={styles[status]}>{labels[status]}</Badge>;
 }

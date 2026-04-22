@@ -61,42 +61,42 @@ export function JobForm({
           }),
         )}
       >
-        <Input label="Job title" error={errors.title?.message} {...register('title')} />
-        <Input label="Location" error={errors.location?.message} {...register('location')} />
+        <Input label="Intitulé du poste" error={errors.title?.message} {...register('title')} />
+        <Input label="Localisation" error={errors.location?.message} {...register('location')} />
         <SelectField
-          label="Contract type"
+          label="Type de contrat"
           error={errors.contractType?.message}
           options={[
-            { label: 'Permanent (CDI)', value: 'CDI' },
-            { label: 'Fixed-term (CDD)', value: 'CDD' },
-            { label: 'Internship', value: 'INTERNSHIP' },
+            { label: 'CDI', value: 'CDI' },
+            { label: 'CDD', value: 'CDD' },
+            { label: 'Stage', value: 'INTERNSHIP' },
             { label: 'Freelance', value: 'FREELANCE' },
-            { label: 'Part time', value: 'PART_TIME' },
+            { label: 'Temps partiel', value: 'PART_TIME' },
           ]}
           {...register('contractType')}
         />
         <SelectField
-          label="Experience"
+          label="Expérience"
           error={errors.experienceLevel?.message}
           options={[
             { label: 'Junior', value: 'JUNIOR' },
-            { label: 'Mid', value: 'MID' },
+            { label: 'Intermédiaire', value: 'MID' },
             { label: 'Senior', value: 'SENIOR' },
             { label: 'Lead', value: 'LEAD' },
           ]}
           {...register('experienceLevel')}
         />
-        <Input label="Salary" error={errors.salary?.message} {...register('salary')} />
-        <Input label="Expiry date" error={errors.expiresAt?.message} type="datetime-local" {...register('expiresAt')} />
+        <Input label="Salaire" error={errors.salary?.message} {...register('salary')} />
+        <Input label="Date d'expiration" error={errors.expiresAt?.message} type="datetime-local" {...register('expiresAt')} />
         <div className="md:col-span-2">
-          <Input label="Required skills" error={errors.requiredSkills?.message} placeholder="React, TypeScript, Spring Boot" {...register('requiredSkills')} />
+          <Input label="Compétences requises" error={errors.requiredSkills?.message} placeholder="React, TypeScript, Spring Boot" {...register('requiredSkills')} />
         </div>
         <div className="md:col-span-2">
           <TextArea label="Description" error={errors.description?.message} {...register('description')} />
         </div>
         <div className="md:col-span-2">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : 'Save job'}
+            {isSubmitting ? 'Enregistrement...' : 'Enregistrer l\'offre'}
           </Button>
         </div>
       </form>

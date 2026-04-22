@@ -3,7 +3,9 @@ package com.recruitment.gateway.filter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -21,20 +23,24 @@ public class UserHeaderPropagationFilter implements GlobalFilter, Ordered {
                         String userId = jwtAuthenticationToken.getToken().getClaimAsString("userId");
                         String email = jwtAuthenticationToken.getToken().getClaimAsString("email");
                         String role = jwtAuthenticationToken.getToken().getClaimAsString("role");
-                        ServerHttpRequest mutatedRequest = exchange.getRequest()
-                                .mutate()
-                                .headers(headers -> {
-                                    if (userId != null) {
-                                        headers.set("X-User-Id", userId);
-                                    }
-                                    if (email != null) {
-                                        headers.set("X-User-Email", email);
-                                    }
-                                    if (role != null) {
-                                        headers.set("X-User-Role", role);
-                                    }
-                                })
-                                .build();
+
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.putAll(exchange.getRequest().getHeaders());
+                        if (userId != null) {
+                            headers.set("X-User-Id", userId);
+                        }
+                        if (email != null) {
+                            headers.set("X-User-Email", email);
+                        }
+                        if (role != null) {
+                            headers.set("X-User-Role", role);
+                        }
+                        ServerHttpRequest mutatedRequest = new ServerHttpRequestDecorator(exchange.getRequest()) {
+                            @Override
+                            public HttpHeaders getHeaders() {
+                                return headers;
+                            }
+                        };
                         return chain.filter(exchange.mutate().request(mutatedRequest).build());
                     }
                     return chain.filter(exchange);

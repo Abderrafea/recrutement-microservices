@@ -8,6 +8,13 @@ import { Spinner } from '../../components/common/Spinner';
 import { AppShell } from '../../components/layout/AppShell';
 import { useJobApplications } from '../../hooks/useApplications';
 
+const statusLabels: Record<string, string> = {
+  REVIEWED: 'Examiner',
+  INTERVIEW: 'Entretien',
+  ACCEPTED: 'Accepter',
+  REJECTED: 'Refuser',
+};
+
 export function ViewApplicationsPage() {
   const { id } = useParams();
   const queryClient = useQueryClient();
@@ -18,13 +25,13 @@ export function ViewApplicationsPage() {
     mutationFn: ({ applicationId, status }: { applicationId: number; status: 'REVIEWED' | 'INTERVIEW' | 'ACCEPTED' | 'REJECTED' }) =>
       updateApplicationStatus(applicationId, { status }),
     onSuccess: () => {
-      toast.success('Application status updated.');
+      toast.success('Statut de la candidature mis à jour.');
       void queryClient.invalidateQueries({ queryKey: ['applications', 'job', Number(id)] });
     },
   });
 
   return (
-    <AppShell eyebrow="Employer command center" title="Review incoming candidates">
+    <AppShell eyebrow="Centre de commande employeur" title="Examiner les candidatures reçues">
       {applicationsQuery.isLoading ? (
         <Spinner />
       ) : (
@@ -34,14 +41,14 @@ export function ViewApplicationsPage() {
             <div className="flex flex-wrap gap-2">
               {(['REVIEWED', 'INTERVIEW', 'ACCEPTED', 'REJECTED'] as const).map((status) => (
                 <Button key={status} variant="ghost" onClick={() => updateMutation.mutate({ applicationId: application.id, status })}>
-                  {status}
+                  {statusLabels[status]}
                 </Button>
               ))}
               <a
                 href={`${apiBaseUrl}/api/users/${application.candidateId}/cv`}
                 className="inline-flex items-center justify-center rounded-full border border-ink/15 px-4 py-3 text-xs font-semibold text-ink"
               >
-                Download CV
+                Télécharger le CV
               </a>
             </div>
           )}

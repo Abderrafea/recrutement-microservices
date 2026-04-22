@@ -8,6 +8,7 @@ import com.recruitment.reportingservice.domain.ReportCache;
 import com.recruitment.reportingservice.repository.ReportCacheRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -17,7 +18,7 @@ public class ReportCacheService {
     private final ReportCacheRepository reportCacheRepository;
     private final ObjectMapper objectMapper;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public <T> T cache(String key, T payload) {
         try {
             ReportCache cache = reportCacheRepository.findByCacheKey(key).orElse(ReportCache.builder().cacheKey(key).build());

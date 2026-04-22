@@ -14,39 +14,39 @@ export function JobFilters({
 }) {
   return (
     <Panel className="space-y-4">
-      <h3 className="font-display text-2xl text-ink">Refine the search</h3>
+      <h3 className="font-display text-2xl text-ink">Affiner la recherche</h3>
       <Input
-        label="Location"
+        label="Localisation"
         value={filters.location ?? ''}
         onChange={(event) => setFilters((current) => ({ ...current, location: event.target.value, page: 0 }))}
       />
       <SelectField
-        label="Contract type"
+        label="Type de contrat"
         value={filters.contractType ?? ''}
         onChange={(event) => setFilters((current) => ({ ...current, contractType: event.target.value || undefined, page: 0 }))}
         options={[
-          { label: 'All contracts', value: '' },
+          { label: 'Tous les contrats', value: '' },
           { label: 'CDI', value: 'CDI' },
           { label: 'CDD', value: 'CDD' },
-          { label: 'Internship', value: 'INTERNSHIP' },
+          { label: 'Stage', value: 'INTERNSHIP' },
           { label: 'Freelance', value: 'FREELANCE' },
-          { label: 'Part time', value: 'PART_TIME' },
+          { label: 'Temps partiel', value: 'PART_TIME' },
         ]}
       />
       <SelectField
-        label="Experience"
+        label="Expérience"
         value={filters.experienceLevel ?? ''}
         onChange={(event) => setFilters((current) => ({ ...current, experienceLevel: event.target.value || undefined, page: 0 }))}
         options={[
-          { label: 'Any level', value: '' },
+          { label: 'Tous niveaux', value: '' },
           { label: 'Junior', value: 'JUNIOR' },
-          { label: 'Mid', value: 'MID' },
+          { label: 'Intermédiaire', value: 'MID' },
           { label: 'Senior', value: 'SENIOR' },
           { label: 'Lead', value: 'LEAD' },
         ]}
       />
       <Button variant="ghost" fullWidth onClick={() => setFilters({ page: 0, size: 9 })}>
-        Reset filters
+        Réinitialiser les filtres
       </Button>
     </Panel>
   );

@@ -42,18 +42,18 @@ export function RegisterPage() {
   const registerMutation = useMutation({
     mutationFn: registerUser,
     onSuccess: () => {
-      toast.success('Account created. You can sign in now.');
+      toast.success('Compte créé. Vous pouvez maintenant vous connecter.');
       navigate('/login');
     },
-    onError: () => toast.error('Registration failed. Please check the form and try again.'),
+    onError: () => toast.error('Échec de l\'inscription. Veuillez vérifier le formulaire et réessayer.'),
   });
 
   return (
     <PageWrapper>
       <div className="mx-auto max-w-2xl">
         <Panel>
-          <p className="text-xs uppercase tracking-[0.24em] text-ink/45">Create an account</p>
-          <h1 className="mt-3 font-display text-4xl text-ink">Join the platform in your role</h1>
+          <p className="text-xs uppercase tracking-[0.24em] text-ink/45">Créer un compte</p>
+          <h1 className="mt-3 font-display text-4xl text-ink">Rejoignez la plateforme selon votre rôle</h1>
           <form
             className="mt-8 grid gap-4 md:grid-cols-2"
             onSubmit={handleSubmit((values) =>
@@ -63,44 +63,44 @@ export function RegisterPage() {
               }),
             )}
           >
-            <Input label="First name" error={errors.firstName?.message} {...register('firstName')} />
-            <Input label="Last name" error={errors.lastName?.message} {...register('lastName')} />
-            <Input label="Email" error={errors.email?.message} {...register('email')} />
-            <Input label="Password" type="password" error={errors.password?.message} {...register('password')} />
+            <Input label="Prénom" error={errors.firstName?.message} {...register('firstName')} />
+            <Input label="Nom" error={errors.lastName?.message} {...register('lastName')} />
+            <Input label="E-mail" error={errors.email?.message} {...register('email')} />
+            <Input label="Mot de passe" type="password" error={errors.password?.message} {...register('password')} />
             <SelectField
-              label="Role"
+              label="Rôle"
               error={errors.role?.message}
               options={[
-                { label: 'Candidate', value: 'CANDIDATE' },
-                { label: 'Employer', value: 'EMPLOYER' },
+                { label: 'Candidat', value: 'CANDIDATE' },
+                { label: 'Employeur', value: 'EMPLOYER' },
               ]}
               {...register('role')}
             />
 
             {role === 'EMPLOYER' ? (
               <>
-                <Input label="Company name" error={errors.companyName?.message} {...register('companyName')} />
+                <Input label="Nom de l'entreprise" error={errors.companyName?.message} {...register('companyName')} />
                 <div className="md:col-span-2">
-                  <TextArea label="Company description" error={errors.companyDescription?.message} {...register('companyDescription')} />
+                  <TextArea label="Description de l'entreprise" error={errors.companyDescription?.message} {...register('companyDescription')} />
                 </div>
               </>
             ) : (
               <>
-                <Input label="Skills" placeholder="Java, Spring, React" {...register('skills')} />
+                <Input label="Compétences" placeholder="Java, Spring, React" {...register('skills')} />
                 <div className="md:col-span-2">
-                  <TextArea label="Profile summary" {...register('summary')} />
+                  <TextArea label="Résumé du profil" {...register('summary')} />
                 </div>
               </>
             )}
 
             <div className="md:col-span-2">
               <Button type="submit" disabled={registerMutation.isPending}>
-                {registerMutation.isPending ? 'Creating...' : 'Create account'}
+                {registerMutation.isPending ? 'Création en cours...' : 'Créer le compte'}
               </Button>
             </div>
           </form>
           <p className="mt-5 text-sm text-ink/65">
-            Already registered? <Link to="/login" className="font-semibold text-coral">Sign in instead</Link>.
+            Déjà inscrit ? <Link to="/login" className="font-semibold text-coral">Connectez-vous</Link>.
           </p>
         </Panel>
       </div>

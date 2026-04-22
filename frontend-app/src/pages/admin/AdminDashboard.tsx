@@ -13,7 +13,7 @@ export function AdminDashboard() {
 
   if (overviewQuery.isLoading || jobsQuery.isLoading || applicationsQuery.isLoading) {
     return (
-      <AppShell eyebrow="Admin analytics" title="Platform visibility at a glance">
+      <AppShell eyebrow="Analytique admin" title="Vue d'ensemble de la plateforme">
         <Spinner />
       </AppShell>
     );
@@ -24,17 +24,17 @@ export function AdminDashboard() {
   const applications = applicationsQuery.data!;
 
   return (
-    <AppShell eyebrow="Admin analytics" title="Platform visibility at a glance">
+    <AppShell eyebrow="Analytique admin" title="Vue d'ensemble de la plateforme">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total users" value={overview.totalUsers} />
-        <StatCard label="Total jobs" value={overview.totalJobOffers} />
-        <StatCard label="Total applications" value={overview.totalApplications} />
-        <StatCard label="Acceptance rate" value={`${Math.round(overview.acceptanceRate * 100)}%`} />
+        <StatCard label="Total utilisateurs" value={overview.totalUsers} />
+        <StatCard label="Total offres" value={overview.totalJobOffers} />
+        <StatCard label="Total candidatures" value={overview.totalApplications} />
+        <StatCard label="Taux d'acceptation" value={`${Math.round(overview.acceptanceRate * 100)}%`} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Panel className="h-96">
-          <h3 className="font-display text-2xl text-ink">Applications by status</h3>
+          <h3 className="font-display text-2xl text-ink">Candidatures par statut</h3>
           <div className="mt-6 h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -46,7 +46,7 @@ export function AdminDashboard() {
         </Panel>
 
         <Panel className="h-96">
-          <h3 className="font-display text-2xl text-ink">Registrations over time</h3>
+          <h3 className="font-display text-2xl text-ink">Inscriptions dans le temps</h3>
           <div className="mt-6 h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={Object.entries(overview.registrationsByDate).map(([date, value]) => ({ date, value }))}>
@@ -61,7 +61,7 @@ export function AdminDashboard() {
       </div>
 
       <Panel className="h-96">
-        <h3 className="font-display text-2xl text-ink">Jobs by contract type</h3>
+        <h3 className="font-display text-2xl text-ink">Offres par type de contrat</h3>
         <div className="mt-6 h-72">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={Object.entries(jobs.jobsByContractType).map(([name, value]) => ({ name, value }))}>

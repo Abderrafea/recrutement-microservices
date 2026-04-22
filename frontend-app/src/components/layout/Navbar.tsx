@@ -24,24 +24,24 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-5 text-sm font-semibold text-ink/70 md:flex">
           <NavLink to="/" className={({ isActive }) => (isActive ? 'text-coral' : undefined)}>
-            Home
+            Accueil
           </NavLink>
           <NavLink to="/jobs" className={({ isActive }) => (isActive ? 'text-coral' : undefined)}>
-            Jobs
+            Offres
           </NavLink>
           {user?.role === 'EMPLOYER' && (
             <NavLink to="/employer/dashboard" className={({ isActive }) => (isActive ? 'text-coral' : undefined)}>
-              Employer Hub
+              Espace Employeur
             </NavLink>
           )}
           {user?.role === 'CANDIDATE' && (
             <NavLink to="/candidate/dashboard" className={({ isActive }) => (isActive ? 'text-coral' : undefined)}>
-              Candidate Hub
+              Espace Candidat
             </NavLink>
           )}
           {user?.role === 'ADMIN' && (
             <NavLink to="/admin/dashboard" className={({ isActive }) => (isActive ? 'text-coral' : undefined)}>
-              Analytics
+              Analytique
             </NavLink>
           )}
         </nav>
@@ -60,9 +60,9 @@ export function Navbar() {
           ) : (
             <>
               <Button variant="ghost" onClick={() => navigate('/login')}>
-                Login
+                Connexion
               </Button>
-              <Button onClick={() => navigate('/register')}>Get Started</Button>
+              <Button onClick={() => navigate('/register')}>Commencer</Button>
             </>
           )}
         </div>

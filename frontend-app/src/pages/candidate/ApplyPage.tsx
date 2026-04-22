@@ -28,18 +28,18 @@ export function ApplyPage() {
   const applyMutation = useMutation({
     mutationFn: (values: ApplyValues) => applyToJob({ jobId: Number(id), coverLetter: values.coverLetter }),
     onSuccess: () => {
-      toast.success('Application submitted.');
+      toast.success('Candidature envoyée.');
       navigate('/candidate/applications');
     },
-    onError: () => toast.error('Unable to submit this application.'),
+    onError: () => toast.error('Impossible de soumettre cette candidature.'),
   });
 
   return (
-    <AppShell eyebrow="Candidate command center" title={`Apply for ${jobQuery.data?.title ?? 'this role'}`}>
+    <AppShell eyebrow="Centre de commande candidat" title={`Postuler pour ${jobQuery.data?.title ?? 'ce poste'}`}>
       <Panel>
         <form onSubmit={form.handleSubmit((values) => applyMutation.mutate(values))} className="space-y-4">
-          <TextArea label="Cover letter" error={form.formState.errors.coverLetter?.message} {...form.register('coverLetter')} />
-          <Button type="submit" disabled={applyMutation.isPending}>{applyMutation.isPending ? 'Submitting...' : 'Submit application'}</Button>
+          <TextArea label="Lettre de motivation" error={form.formState.errors.coverLetter?.message} {...form.register('coverLetter')} />
+          <Button type="submit" disabled={applyMutation.isPending}>{applyMutation.isPending ? 'Envoi en cours...' : 'Envoyer la candidature'}</Button>
         </form>
       </Panel>
     </AppShell>

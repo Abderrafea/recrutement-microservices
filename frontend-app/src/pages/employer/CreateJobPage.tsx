@@ -10,14 +10,14 @@ export function CreateJobPage() {
   const createMutation = useMutation({
     mutationFn: createJob,
     onSuccess: () => {
-      toast.success('Job posted.');
+      toast.success('Offre publiée.');
       navigate('/employer/jobs');
     },
-    onError: () => toast.error('Unable to create the job.'),
+    onError: () => toast.error('Impossible de créer l\'offre.'),
   });
 
   return (
-    <AppShell eyebrow="Employer command center" title="Create a new role">
+    <AppShell eyebrow="Centre de commande employeur" title="Créer une nouvelle offre">
       <JobForm isSubmitting={createMutation.isPending} onSubmit={(payload) => createMutation.mutate(payload)} />
     </AppShell>
   );

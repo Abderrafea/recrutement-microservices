@@ -34,34 +34,34 @@ export function CandidateProfilePage() {
         ...values,
         skills: values.skills.split(',').map((skill) => skill.trim()).filter(Boolean),
       }),
-    onSuccess: () => toast.success('Profile updated.'),
-    onError: () => toast.error('Unable to update profile.'),
+    onSuccess: () => toast.success('Profil mis à jour.'),
+    onError: () => toast.error('Impossible de mettre à jour le profil.'),
   });
 
   const cvMutation = useMutation({
     mutationFn: (file: File) => uploadCv(user!.id, file),
-    onSuccess: () => toast.success('CV uploaded.'),
-    onError: () => toast.error('Unable to upload CV.'),
+    onSuccess: () => toast.success('CV téléversé.'),
+    onError: () => toast.error('Impossible de téléverser le CV.'),
   });
 
   return (
-    <AppShell eyebrow="Candidate command center" title="Shape your candidate profile">
+    <AppShell eyebrow="Centre de commande candidat" title="Personnalisez votre profil candidat">
       <Panel>
         <form className="grid gap-4 md:grid-cols-2" onSubmit={form.handleSubmit((values) => updateMutation.mutate(values))}>
-          <Input label="First name" {...form.register('firstName')} />
-          <Input label="Last name" {...form.register('lastName')} />
-          <Input label="Phone" {...form.register('phone')} />
-          <Input label="Address" {...form.register('address')} />
+          <Input label="Prénom" {...form.register('firstName')} />
+          <Input label="Nom" {...form.register('lastName')} />
+          <Input label="Téléphone" {...form.register('phone')} />
+          <Input label="Adresse" {...form.register('address')} />
           <div className="md:col-span-2">
-            <Input label="Skills" placeholder="Java, Spring Boot, React" {...form.register('skills')} />
+            <Input label="Compétences" placeholder="Java, Spring Boot, React" {...form.register('skills')} />
           </div>
           <div className="md:col-span-2">
-            <TextArea label="Summary" {...form.register('summary')} />
+            <TextArea label="Résumé" {...form.register('summary')} />
           </div>
           <div className="md:col-span-2 flex flex-wrap gap-3">
-            <Button type="submit" disabled={updateMutation.isPending}>Save profile</Button>
+            <Button type="submit" disabled={updateMutation.isPending}>Enregistrer le profil</Button>
             <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-ink/15 bg-white/70 px-5 py-3 text-sm font-semibold text-ink">
-              Upload CV
+              Téléverser le CV
               <input
                 type="file"
                 className="hidden"

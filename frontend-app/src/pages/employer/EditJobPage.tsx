@@ -14,14 +14,14 @@ export function EditJobPage() {
   const updateMutation = useMutation({
     mutationFn: (payload: Parameters<typeof updateJob>[1]) => updateJob(id!, payload),
     onSuccess: () => {
-      toast.success('Job updated.');
+      toast.success('Offre mise à jour.');
       navigate('/employer/jobs');
     },
-    onError: () => toast.error('Unable to update the job.'),
+    onError: () => toast.error('Impossible de mettre à jour l\'offre.'),
   });
 
   return (
-    <AppShell eyebrow="Employer command center" title="Edit role details">
+    <AppShell eyebrow="Centre de commande employeur" title="Modifier les détails du poste">
       {jobQuery.isLoading || !jobQuery.data ? (
         <Spinner />
       ) : (

@@ -16,13 +16,13 @@ export function UsersManagementPage() {
   const deleteMutation = useMutation({
     mutationFn: deleteUser,
     onSuccess: () => {
-      toast.success('User deleted.');
+      toast.success('Utilisateur supprimé.');
       void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
   });
 
   return (
-    <AppShell eyebrow="Admin analytics" title="User directory">
+    <AppShell eyebrow="Analytique admin" title="Annuaire des utilisateurs">
       {usersQuery.isLoading ? (
         <Spinner />
       ) : (
@@ -30,9 +30,9 @@ export function UsersManagementPage() {
           <table className="min-w-full text-left text-sm">
             <thead>
               <tr className="border-b border-ink/10 text-ink/45">
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Role</th>
+                <th className="px-4 py-3">Nom</th>
+                <th className="px-4 py-3">E-mail</th>
+                <th className="px-4 py-3">Rôle</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -43,7 +43,7 @@ export function UsersManagementPage() {
                   <td className="px-4 py-4">{user.email}</td>
                   <td className="px-4 py-4">{user.role}</td>
                   <td className="px-4 py-4">
-                    <Button variant="danger" onClick={() => deleteMutation.mutate(user.id)}>Delete</Button>
+                    <Button variant="danger" onClick={() => deleteMutation.mutate(user.id)}>Supprimer</Button>
                   </td>
                 </tr>
               ))}

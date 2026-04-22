@@ -18,20 +18,20 @@ export function EmployerDashboard() {
   const report = reportQuery.data;
 
   return (
-    <AppShell eyebrow="Employer command center" title="Keep every hiring lane moving">
+    <AppShell eyebrow="Centre de commande employeur" title="Gardez le cap sur vos recrutements">
       {reportQuery.isLoading ? (
         <Spinner />
       ) : report ? (
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <StatCard label="Active jobs" value={report.openJobs} />
-            <StatCard label="Applications received" value={report.totalApplicationsReceived} />
-            <StatCard label="Acceptance rate" value={`${Math.round(report.acceptanceRate * 100)}%`} />
-            <StatCard label="Avg. apps per job" value={report.averageApplicationsPerJob.toFixed(2)} />
+            <StatCard label="Offres actives" value={report.openJobs} />
+            <StatCard label="Candidatures reçues" value={report.totalApplicationsReceived} />
+            <StatCard label="Taux d'acceptation" value={`${Math.round(report.acceptanceRate * 100)}%`} />
+            <StatCard label="Moy. cand. / offre" value={report.averageApplicationsPerJob.toFixed(2)} />
           </div>
 
           <Panel className="h-96">
-            <h3 className="font-display text-2xl text-ink">Applications per job</h3>
+            <h3 className="font-display text-2xl text-ink">Candidatures par offre</h3>
             <div className="mt-6 h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={report.jobPerformance}>

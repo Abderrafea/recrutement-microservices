@@ -29,24 +29,24 @@ export function EmployerProfilePage() {
 
   const updateMutation = useMutation({
     mutationFn: (values: Record<string, string>) => updateProfile(user!.id, values),
-    onSuccess: () => toast.success('Employer profile updated.'),
-    onError: () => toast.error('Unable to update the employer profile.'),
+    onSuccess: () => toast.success('Profil employeur mis à jour.'),
+    onError: () => toast.error('Impossible de mettre à jour le profil employeur.'),
   });
 
   return (
-    <AppShell eyebrow="Employer command center" title="Polish your company profile">
+    <AppShell eyebrow="Centre de commande employeur" title="Peaufinez votre profil entreprise">
       <Panel>
         <form className="grid gap-4 md:grid-cols-2" onSubmit={form.handleSubmit((values) => updateMutation.mutate(values))}>
-          <Input label="First name" {...form.register('firstName')} />
-          <Input label="Last name" {...form.register('lastName')} />
-          <Input label="Company name" {...form.register('companyName')} />
-          <Input label="Industry" {...form.register('industry')} />
-          <Input label="Website" className="md:col-span-2" {...form.register('website')} />
+          <Input label="Prénom" {...form.register('firstName')} />
+          <Input label="Nom" {...form.register('lastName')} />
+          <Input label="Nom de l'entreprise" {...form.register('companyName')} />
+          <Input label="Secteur d'activité" {...form.register('industry')} />
+          <Input label="Site web" className="md:col-span-2" {...form.register('website')} />
           <div className="md:col-span-2">
-            <TextArea label="Company description" {...form.register('companyDescription')} />
+            <TextArea label="Description de l'entreprise" {...form.register('companyDescription')} />
           </div>
           <div className="md:col-span-2">
-            <Button type="submit" disabled={updateMutation.isPending}>Save changes</Button>
+            <Button type="submit" disabled={updateMutation.isPending}>Enregistrer les modifications</Button>
           </div>
         </form>
       </Panel>

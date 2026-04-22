@@ -26,7 +26,7 @@ export function JobDetailPage() {
   if (!job) {
     return (
       <PageWrapper>
-        <Panel>Job not found.</Panel>
+        <Panel>Offre introuvable.</Panel>
       </PageWrapper>
     );
   }
@@ -56,23 +56,23 @@ export function JobDetailPage() {
 
         <div className="space-y-6">
           <Panel>
-            <h3 className="font-display text-2xl text-ink">Role snapshot</h3>
+            <h3 className="font-display text-2xl text-ink">Aperçu du poste</h3>
             <dl className="mt-5 space-y-4 text-sm text-ink/70">
               <div>
-                <dt className="text-xs uppercase tracking-[0.24em] text-ink/45">Location</dt>
+                <dt className="text-xs uppercase tracking-[0.24em] text-ink/45">Localisation</dt>
                 <dd className="mt-1">{job.location}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-[0.24em] text-ink/45">Salary</dt>
+                <dt className="text-xs uppercase tracking-[0.24em] text-ink/45">Salaire</dt>
                 <dd className="mt-1">{formatSalary(job.salary)}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-[0.24em] text-ink/45">Posted</dt>
+                <dt className="text-xs uppercase tracking-[0.24em] text-ink/45">Publié le</dt>
                 <dd className="mt-1">{formatDate(job.publishedAt)}</dd>
               </div>
             </dl>
             <Link to={applyPath} className="mt-6 inline-flex">
-              <Button fullWidth>{user?.role === 'CANDIDATE' ? 'Apply now' : 'Login to apply'}</Button>
+              <Button fullWidth>{user?.role === 'CANDIDATE' ? 'Postuler maintenant' : 'Se connecter pour postuler'}</Button>
             </Link>
           </Panel>
         </div>

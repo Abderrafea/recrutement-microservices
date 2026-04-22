@@ -22,15 +22,15 @@ export function CandidateDashboard() {
 
   return (
     <AppShell
-      eyebrow="Candidate command center"
-      title="Track your momentum"
-      actions={<Link to="/jobs"><Button>Browse jobs</Button></Link>}
+      eyebrow="Centre de commande candidat"
+      title="Suivez votre progression"
+      actions={<Link to="/jobs"><Button>Parcourir les offres</Button></Link>}
     >
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total applications" value={stats.total} />
-        <StatCard label="Pending review" value={stats.pending} />
-        <StatCard label="Interviews" value={stats.interviews} />
-        <StatCard label="Accepted" value={stats.accepted} />
+        <StatCard label="Total candidatures" value={stats.total} />
+        <StatCard label="En attente de revue" value={stats.pending} />
+        <StatCard label="Entretiens" value={stats.interviews} />
+        <StatCard label="Acceptées" value={stats.accepted} />
       </div>
 
       {applicationsQuery.isLoading ? (
@@ -38,7 +38,7 @@ export function CandidateDashboard() {
       ) : applications.length ? (
         <ApplicationTable applications={applications.slice(0, 5)} />
       ) : (
-        <EmptyState title="No applications yet" description="Once you apply to a role, your recent activity will appear here." />
+        <EmptyState title="Aucune candidature" description="Dès que vous postulerez à une offre, votre activité récente apparaîtra ici." />
       )}
     </AppShell>
   );

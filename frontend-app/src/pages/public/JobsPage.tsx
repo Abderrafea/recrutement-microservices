@@ -17,12 +17,12 @@ export function JobsPage() {
   return (
     <PageWrapper>
       <section className="glass-panel rounded-[36px] border border-white/70 p-8 shadow-panel">
-        <p className="text-xs uppercase tracking-[0.24em] text-ink/45">Browse all open positions</p>
+        <p className="text-xs uppercase tracking-[0.24em] text-ink/45">Parcourir tous les postes ouverts</p>
         <div className="mt-5 flex flex-col gap-4 md:flex-row">
           <Input
             className="flex-1"
-            label="Keyword"
-            placeholder="Search by title or description"
+            label="Mot-clé"
+            placeholder="Rechercher par titre ou description"
             value={filters.query ?? ''}
             onChange={(event) =>
               startTransition(() => {
@@ -32,7 +32,7 @@ export function JobsPage() {
           />
           <div className="flex items-end">
             <Button variant="secondary" onClick={() => setFilters((current) => ({ ...current, page: 0 }))}>
-              Refresh results
+              Actualiser
             </Button>
           </div>
         </div>
@@ -53,7 +53,7 @@ export function JobsPage() {
               </div>
               <div className="flex items-center justify-between rounded-[28px] bg-white/70 px-5 py-4 text-sm text-ink/65">
                 <span>
-                  Page {(jobsQuery.data.number ?? 0) + 1} of {jobsQuery.data.totalPages || 1}
+                  Page {(jobsQuery.data.number ?? 0) + 1} sur {jobsQuery.data.totalPages || 1}
                 </span>
                 <div className="flex gap-3">
                   <Button
@@ -61,19 +61,19 @@ export function JobsPage() {
                     disabled={(filters.page ?? 0) === 0}
                     onClick={() => setFilters((current) => ({ ...current, page: Math.max((current.page ?? 0) - 1, 0) }))}
                   >
-                    Previous
+                    Précédent
                   </Button>
                   <Button
                     disabled={(filters.page ?? 0) + 1 >= (jobsQuery.data.totalPages || 1)}
                     onClick={() => setFilters((current) => ({ ...current, page: (current.page ?? 0) + 1 }))}
                   >
-                    Next
+                    Suivant
                   </Button>
                 </div>
               </div>
             </>
           ) : (
-            <EmptyState title="No jobs match those filters" description="Try widening the search criteria or removing a filter to reveal more roles." />
+            <EmptyState title="Aucune offre ne correspond" description="Essayez d'élargir vos critères de recherche ou de retirer un filtre pour afficher plus de résultats." />
           )}
         </div>
       </section>

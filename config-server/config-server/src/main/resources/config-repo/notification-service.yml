@@ -39,6 +39,9 @@ eureka:
       defaultZone: ${EUREKA_DEFAULT_ZONE:http://discovery-service:8761/eureka/}
 
 management:
+  health:
+    mail:
+      enabled: ${MAIL_HEALTH_ENABLED:false}
   endpoints:
     web:
       exposure:

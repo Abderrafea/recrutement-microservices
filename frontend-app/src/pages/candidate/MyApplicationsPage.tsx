@@ -17,14 +17,14 @@ export function MyApplicationsPage() {
   const withdrawMutation = useMutation({
     mutationFn: withdrawApplication,
     onSuccess: () => {
-      toast.success('Application withdrawn.');
+      toast.success('Candidature retirée.');
       void queryClient.invalidateQueries({ queryKey: ['applications', 'candidate', user?.id] });
     },
-    onError: () => toast.error('Unable to withdraw the application.'),
+    onError: () => toast.error('Impossible de retirer la candidature.'),
   });
 
   return (
-    <AppShell eyebrow="Candidate command center" title="Your application pipeline">
+    <AppShell eyebrow="Centre de commande candidat" title="Votre pipeline de candidatures">
       {applicationsQuery.isLoading ? (
         <Spinner />
       ) : applicationsQuery.data?.length ? (
@@ -33,13 +33,13 @@ export function MyApplicationsPage() {
           renderActions={(application) =>
             application.status === 'PENDING' ? (
               <Button variant="danger" onClick={() => withdrawMutation.mutate(application.id)}>
-                Withdraw
+                Retirer
               </Button>
             ) : null
           }
         />
       ) : (
-        <EmptyState title="No applications to show" description="Your submitted applications will appear here with their current statuses." />
+        <EmptyState title="Aucune candidature à afficher" description="Vos candidatures soumises apparaîtront ici avec leur statut actuel." />
       )}
     </AppShell>
   );

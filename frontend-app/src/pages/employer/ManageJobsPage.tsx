@@ -23,7 +23,7 @@ export function ManageJobsPage() {
   const deleteMutation = useMutation({
     mutationFn: deleteJob,
     onSuccess: () => {
-      toast.success('Job removed.');
+      toast.success('Offre supprimée.');
       void refreshJobs();
     },
   });
@@ -31,26 +31,26 @@ export function ManageJobsPage() {
   const statusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: 'OPEN' | 'CLOSED' | 'PAUSED' }) => changeJobStatus(id, status),
     onSuccess: () => {
-      toast.success('Job status updated.');
+      toast.success('Statut de l\'offre mis à jour.');
       void refreshJobs();
     },
   });
 
   return (
     <AppShell
-      eyebrow="Employer command center"
-      title="Manage your job board"
-      actions={<Link to="/employer/jobs/new"><Button>Post new job</Button></Link>}
+      eyebrow="Centre de commande employeur"
+      title="Gérez vos offres d'emploi"
+      actions={<Link to="/employer/jobs/new"><Button>Publier une offre</Button></Link>}
     >
       {jobsQuery.data?.length ? (
         <Panel className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
               <tr className="border-b border-ink/10 text-ink/45">
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Applications</th>
-                <th className="px-4 py-3">Published</th>
+                <th className="px-4 py-3">Titre</th>
+                <th className="px-4 py-3">Statut</th>
+                <th className="px-4 py-3">Candidatures</th>
+                <th className="px-4 py-3">Publié le</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -63,12 +63,12 @@ export function ManageJobsPage() {
                   <td className="px-4 py-4 text-xs text-ink/55">{formatDate(job.publishedAt)}</td>
                   <td className="px-4 py-4">
                     <div className="flex flex-wrap gap-2">
-                      <Link to={`/employer/jobs/${job.id}/edit`}><Button variant="ghost">Edit</Button></Link>
-                      <Link to={`/employer/jobs/${job.id}/applications`}><Button variant="secondary">Applications</Button></Link>
+                      <Link to={`/employer/jobs/${job.id}/edit`}><Button variant="ghost">Modifier</Button></Link>
+                      <Link to={`/employer/jobs/${job.id}/applications`}><Button variant="secondary">Candidatures</Button></Link>
                       <Button variant="ghost" onClick={() => statusMutation.mutate({ id: job.id, status: job.status === 'OPEN' ? 'PAUSED' : 'OPEN' })}>
-                        {job.status === 'OPEN' ? 'Pause' : 'Reopen'}
+                        {job.status === 'OPEN' ? 'Suspendre' : 'Réouvrir'}
                       </Button>
-                      <Button variant="danger" onClick={() => deleteMutation.mutate(job.id)}>Delete</Button>
+                      <Button variant="danger" onClick={() => deleteMutation.mutate(job.id)}>Supprimer</Button>
                     </div>
                   </td>
                 </tr>
@@ -77,7 +77,7 @@ export function ManageJobsPage() {
           </table>
         </Panel>
       ) : (
-        <EmptyState title="No jobs published yet" description="Create your first opening and it will show up here with live application counts." />
+        <EmptyState title="Aucune offre publiée" description="Créez votre première offre et elle apparaîtra ici avec le nombre de candidatures en temps réel." />
       )}
     </AppShell>
   );
