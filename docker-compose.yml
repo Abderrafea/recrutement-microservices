@@ -153,6 +153,9 @@ services:
       RABBITMQ_HOST: rabbitmq
       USER_SERVICE_URL: http://user-service:8081
       JOB_SERVICE_URL: http://job-service:8082
+      APP_CV_STORAGE_DIR: /data/application-cv
+    volumes:
+      - application_cv_data:/data/application-cv
     depends_on:
       config-server:
         condition: service_healthy
@@ -256,3 +259,4 @@ volumes:
   apps_data:
   reporting_data:
   user_cv_data:
+  application_cv_data:

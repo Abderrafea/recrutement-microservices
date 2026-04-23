@@ -4,6 +4,7 @@ import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { Panel } from '../../components/common/Panel';
 import { Spinner } from '../../components/common/Spinner';
+import { useCandidateApplications } from '../../hooks/useApplications';
 import { useJob } from '../../hooks/useJobs';
 import { useAuth } from '../../hooks/useAuth';
 import { formatDate } from '../../utils/formatDate';
@@ -13,6 +14,7 @@ export function JobDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const jobQuery = useJob(id);
+  const candidateApplicationsQuery = useCandidateApplications(user?.role === 'CANDIDATE' ? user.id : undefined);
 
   if (jobQuery.isLoading) {
     return (
@@ -31,7 +33,7 @@ export function JobDetailPage() {
     );
   }
 
-  const applyPath = user?.role === 'CANDIDATE' ? `/jobs/${job.id}/apply` : '/login';
+  const hasAlreadyApplied = candidateApplicationsQuery.data?.some((application) => application.jobId === job.id) ?? false;
 
   return (
     <PageWrapper>
@@ -56,7 +58,7 @@ export function JobDetailPage() {
 
         <div className="space-y-6">
           <Panel>
-            <h3 className="font-display text-2xl text-ink">Aperçu du poste</h3>
+            <h3 className="font-display text-2xl text-ink">Apercu du poste</h3>
             <dl className="mt-5 space-y-4 text-sm text-ink/70">
               <div>
                 <dt className="text-xs uppercase tracking-[0.24em] text-ink/45">Localisation</dt>
@@ -67,13 +69,30 @@ export function JobDetailPage() {
                 <dd className="mt-1">{formatSalary(job.salary)}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-[0.24em] text-ink/45">Publié le</dt>
+                <dt className="text-xs uppercase tracking-[0.24em] text-ink/45">Publie le</dt>
                 <dd className="mt-1">{formatDate(job.publishedAt)}</dd>
               </div>
             </dl>
-            <Link to={applyPath} className="mt-6 inline-flex">
-              <Button fullWidth>{user?.role === 'CANDIDATE' ? 'Postuler maintenant' : 'Se connecter pour postuler'}</Button>
-            </Link>
+
+            {user?.role === 'CANDIDATE' ? (
+              candidateApplicationsQuery.isLoading ? (
+                <div className="mt-6 inline-flex w-full">
+                  <Button fullWidth disabled>Verification...</Button>
+                </div>
+              ) : hasAlreadyApplied ? (
+                <div className="mt-6 inline-flex w-full">
+                  <Button fullWidth disabled>Deja postule</Button>
+                </div>
+              ) : (
+                <Link to={`/jobs/${job.id}/apply`} className="mt-6 inline-flex w-full">
+                  <Button fullWidth>Postuler maintenant</Button>
+                </Link>
+              )
+            ) : (
+              <Link to="/login" className="mt-6 inline-flex w-full">
+                <Button fullWidth>Se connecter pour postuler</Button>
+              </Link>
+            )}
           </Panel>
         </div>
       </div>

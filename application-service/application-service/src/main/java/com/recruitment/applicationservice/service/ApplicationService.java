@@ -3,14 +3,12 @@ package com.recruitment.applicationservice.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.recruitment.applicationservice.client.JobServiceClient;
 import com.recruitment.applicationservice.client.UserServiceClient;
 import com.recruitment.applicationservice.domain.ApplicationStatus;
 import com.recruitment.applicationservice.domain.JobApplication;
-import com.recruitment.applicationservice.dto.ApplicationRequest;
 import com.recruitment.applicationservice.dto.ApplicationResponse;
 import com.recruitment.applicationservice.dto.ApplicationStatisticsDto;
 import com.recruitment.applicationservice.dto.UpdateApplicationStatusRequest;
@@ -24,8 +22,10 @@ import com.recruitment.applicationservice.mapper.ApplicationMapper;
 import com.recruitment.applicationservice.repository.JobApplicationRepository;
 import com.recruitment.applicationservice.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -37,16 +37,18 @@ public class ApplicationService {
     private final JobServiceClient jobServiceClient;
     private final UserServiceClient userServiceClient;
     private final ApplicationEventPublisher eventPublisher;
+    private final FileStorageService fileStorageService;
 
     @Transactional
-    public ApplicationResponse apply(ApplicationRequest request) {
+    public ApplicationResponse apply(Long jobId, String coverLetter, MultipartFile cvFile) {
         ensureRole("CANDIDATE");
         Long candidateId = securityUtils.currentUserId();
-        if (jobApplicationRepository.existsByCandidateIdAndJobId(candidateId, request.jobId())) {
-            throw new DuplicateApplicationException("Candidate " + candidateId + " has already applied to job " + request.jobId());
+        if (jobApplicationRepository.existsByCandidateIdAndJobId(candidateId, jobId)) {
+            throw new DuplicateApplicationException("Candidate " + candidateId + " has already applied to job " + jobId);
         }
+        validateApplicationInput(coverLetter, cvFile);
 
-        JobServiceClient.JobSnapshot job = jobServiceClient.getJob(request.jobId());
+        JobServiceClient.JobSnapshot job = jobServiceClient.getJob(jobId);
         if (!"OPEN".equals(job.status())) {
             throw new ValidationException("Applications are only allowed for open jobs");
         }
@@ -59,35 +61,46 @@ public class ApplicationService {
 
         JobApplication application = jobApplicationRepository.save(JobApplication.builder()
                 .candidateId(candidateId)
-                .jobId(request.jobId())
-                .coverLetter(request.coverLetter().trim())
+                .jobId(jobId)
+                .coverLetter(coverLetter.trim())
                 .status(ApplicationStatus.PENDING)
                 .appliedAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build());
 
-        jobServiceClient.adjustApplicationCount(request.jobId(), 1);
+        String cvFilePath = null;
+        try {
+            cvFilePath = fileStorageService.storeCv(application.getId(), cvFile);
+            application.setCvFilePath(cvFilePath);
+            application = jobApplicationRepository.save(application);
 
-        eventPublisher.publishCreated(new ApplicationCreatedEvent(
-                "APPLICATION_CREATED",
-                application.getId(),
-                candidate.userId(),
-                candidate.email(),
-                candidate.fullName(),
-                employer.employerId(),
-                employer.email(),
-                job.id(),
-                job.title(),
-                job.company(),
-                LocalDateTime.now()));
+            jobServiceClient.adjustApplicationCount(jobId, 1);
 
-        return applicationMapper.toResponse(
-                application,
-                candidate.fullName(),
-                candidate.email(),
-                candidate.cvUrl(),
-                job.title(),
-                job.company());
+            eventPublisher.publishCreated(new ApplicationCreatedEvent(
+                    "APPLICATION_CREATED",
+                    application.getId(),
+                    candidate.userId(),
+                    candidate.email(),
+                    candidate.fullName(),
+                    employer.employerId(),
+                    employer.email(),
+                    job.id(),
+                    job.title(),
+                    job.company(),
+                    LocalDateTime.now()));
+
+            return applicationMapper.toResponse(
+                    application,
+                    candidate.fullName(),
+                    candidate.email(),
+                    candidate.cvUrl(),
+                    job.title(),
+                    job.company(),
+                    fileStorageService.resolveFileName(application.getCvFilePath()));
+        } catch (RuntimeException exception) {
+            fileStorageService.deleteIfExists(cvFilePath);
+            throw exception;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -119,7 +132,7 @@ public class ApplicationService {
     @Transactional(readOnly = true)
     public List<ApplicationResponse> getApplicationsForJobInternal(Long jobId) {
         return jobApplicationRepository.findAllByJobIdOrderByAppliedAtDesc(jobId).stream()
-                .map(this::enrich)
+                .map(this::toInternalResponse)
                 .toList();
     }
 
@@ -159,7 +172,8 @@ public class ApplicationService {
                 candidate.email(),
                 candidate.cvUrl(),
                 job.title(),
-                job.company());
+                job.company(),
+                fileStorageService.resolveFileName(saved.getCvFilePath()));
     }
 
     @Transactional
@@ -171,8 +185,21 @@ public class ApplicationService {
         if (application.getStatus() != ApplicationStatus.PENDING && !securityUtils.isAdmin()) {
             throw new ValidationException("Only pending applications can be withdrawn");
         }
+        fileStorageService.deleteIfExists(application.getCvFilePath());
         jobApplicationRepository.delete(application);
         jobServiceClient.adjustApplicationCount(application.getJobId(), -1);
+    }
+
+    @Transactional(readOnly = true)
+    public DownloadedFile downloadCv(Long applicationId) {
+        JobApplication application = findApplication(applicationId);
+        authorizeDownload(application);
+        if (application.getCvFilePath() == null || application.getCvFilePath().isBlank()) {
+            throw new ResourceNotFoundException("No CV found for this application");
+        }
+
+        Resource resource = fileStorageService.loadCv(application.getCvFilePath());
+        return new DownloadedFile(resource, fileStorageService.resolveFileName(application.getCvFilePath()));
     }
 
     @Transactional(readOnly = true)
@@ -181,7 +208,7 @@ public class ApplicationService {
                 .filter(application -> candidateId == null || candidateId.equals(application.getCandidateId()))
                 .filter(application -> jobId == null || jobId.equals(application.getJobId()))
                 .sorted((left, right) -> right.getAppliedAt().compareTo(left.getAppliedAt()))
-                .map(this::enrich)
+                .map(this::toInternalResponse)
                 .toList();
     }
 
@@ -204,7 +231,34 @@ public class ApplicationService {
                 candidate.email(),
                 candidate.cvUrl(),
                 job.title(),
-                job.company());
+                job.company(),
+                fileStorageService.resolveFileName(application.getCvFilePath()));
+    }
+
+    private ApplicationResponse toInternalResponse(JobApplication application) {
+        return applicationMapper.toResponse(
+                application,
+                null,
+                null,
+                null,
+                null,
+                null,
+                fileStorageService.resolveFileName(application.getCvFilePath()));
+    }
+
+    private void validateApplicationInput(String coverLetter, MultipartFile cvFile) {
+        if (coverLetter == null || coverLetter.isBlank()) {
+            throw new ValidationException("Cover letter is required");
+        }
+        if (cvFile == null || cvFile.isEmpty()) {
+            throw new ValidationException("A CV file is required to apply");
+        }
+
+        String originalName = cvFile.getOriginalFilename();
+        String normalizedName = originalName == null ? "" : originalName.toLowerCase();
+        if (!(normalizedName.endsWith(".pdf") || normalizedName.endsWith(".doc") || normalizedName.endsWith(".docx"))) {
+            throw new ValidationException("CV files must be PDF, DOC, or DOCX");
+        }
     }
 
     private void authorizeAccess(JobApplication application) {
@@ -222,6 +276,25 @@ public class ApplicationService {
             }
         }
         throw new UnauthorizedException("You are not allowed to view this application");
+    }
+
+    private void authorizeDownload(JobApplication application) {
+        if (securityUtils.isAdmin()) {
+            return;
+        }
+
+        String role = securityUtils.currentRole();
+        if ("CANDIDATE".equals(role) && securityUtils.currentUserId().equals(application.getCandidateId())) {
+            return;
+        }
+        if ("EMPLOYER".equals(role)) {
+            JobServiceClient.JobSnapshot job = jobServiceClient.getJob(application.getJobId());
+            if (securityUtils.currentUserId().equals(job.employerId())) {
+                return;
+            }
+        }
+
+        throw new UnauthorizedException("You are not allowed to download this CV");
     }
 
     private void ensureRole(String role) {
@@ -242,5 +315,8 @@ public class ApplicationService {
     private JobApplication findApplication(Long id) {
         return jobApplicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application with id " + id + " not found"));
+    }
+
+    public record DownloadedFile(Resource resource, String fileName) {
     }
 }

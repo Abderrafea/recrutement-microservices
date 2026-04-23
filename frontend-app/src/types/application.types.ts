@@ -4,6 +4,7 @@ export interface Application {
   candidateName?: string;
   candidateEmail?: string;
   candidateCvUrl?: string;
+  cvFileName?: string;
   jobId: number;
   jobTitle?: string;
   company?: string;
@@ -17,6 +18,7 @@ export interface Application {
 export interface ApplyPayload {
   jobId: number;
   coverLetter: string;
+  cvFile: File;
 }
 
 export interface StatusUpdatePayload {

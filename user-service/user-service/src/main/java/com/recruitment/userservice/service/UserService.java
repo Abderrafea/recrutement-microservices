@@ -7,6 +7,7 @@ import com.recruitment.userservice.domain.CandidateProfile;
 import com.recruitment.userservice.domain.EmployerProfile;
 import com.recruitment.userservice.domain.Role;
 import com.recruitment.userservice.domain.User;
+import com.recruitment.userservice.dto.user.ChangePasswordRequest;
 import com.recruitment.userservice.dto.user.UpdateUserProfileRequest;
 import com.recruitment.userservice.dto.user.UserProfileDto;
 import com.recruitment.userservice.dto.user.UserSummaryDto;
@@ -21,6 +22,7 @@ import com.recruitment.userservice.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,6 +36,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final SecurityUtils securityUtils;
     private final FileStorageService fileStorageService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public UserProfileDto getCurrentUserProfile() {
@@ -134,6 +137,21 @@ public class UserService {
             employerProfileRepository.findByUserId(userId).ifPresent(employerProfileRepository::delete);
         }
         userRepository.delete(user);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        if (!securityUtils.isSelfOrAdmin(userId)) {
+            throw new UnauthorizedException("You are not allowed to change the password for this user");
+        }
+
+        User user = findUser(userId);
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
+            throw new ValidationException("Current password is incorrect");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
     }
 
     private User findUser(Long id) {

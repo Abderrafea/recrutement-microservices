@@ -1,0 +1,1 @@
+ALTER TABLE applications ADD COLUMN cv_file_path VARCHAR(255);

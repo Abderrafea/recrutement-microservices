@@ -17,7 +17,7 @@ import com.recruitment.applicationservice.security.JwtRoleAuthenticationConverte
 
 @Configuration
 @EnableMethodSecurity
-@EnableConfigurationProperties({ServiceClientsProperties.class, MessagingProperties.class})
+@EnableConfigurationProperties({ServiceClientsProperties.class, MessagingProperties.class, StorageProperties.class})
 public class RabbitConfig {
 
     @Bean

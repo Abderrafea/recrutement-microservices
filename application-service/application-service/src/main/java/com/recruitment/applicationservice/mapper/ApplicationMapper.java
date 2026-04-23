@@ -12,7 +12,8 @@ public interface ApplicationMapper {
                                            String candidateEmail,
                                            String candidateCvUrl,
                                            String jobTitle,
-                                           String company) {
+                                           String company,
+                                           String cvFileName) {
         return new ApplicationResponse(
                 application.getId(),
                 application.getCandidateId(),
@@ -26,6 +27,7 @@ public interface ApplicationMapper {
                 application.getStatus(),
                 application.getAppliedAt(),
                 application.getUpdatedAt(),
-                application.getEmployerNote());
+                application.getEmployerNote(),
+                cvFileName);
     }
 }

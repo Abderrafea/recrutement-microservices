@@ -1,3 +1,9 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 management:
   endpoints:
     web:
@@ -7,3 +13,6 @@ management:
     health:
       probes:
         enabled: true
+
+storage:
+  cv-directory: ${APP_CV_STORAGE_DIR:uploads/applications/cv}

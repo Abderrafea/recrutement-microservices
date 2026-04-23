@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { AppShell } from '../../components/layout/AppShell';
-import { Panel } from '../../components/common/Panel';
-import { StatCard } from '../../components/common/StatCard';
-import { Spinner } from '../../components/common/Spinner';
 import { getEmployerReport } from '../../api/reports.api';
+import { Panel } from '../../components/common/Panel';
+import { Spinner } from '../../components/common/Spinner';
+import { StatCard } from '../../components/common/StatCard';
+import { AppShell } from '../../components/layout/AppShell';
 import { useAuth } from '../../hooks/useAuth';
 
 export function EmployerDashboard() {
@@ -21,11 +21,13 @@ export function EmployerDashboard() {
     <AppShell eyebrow="Centre de commande employeur" title="Gardez le cap sur vos recrutements">
       {reportQuery.isLoading ? (
         <Spinner />
+      ) : reportQuery.isError ? (
+        <Panel>Impossible de charger le tableau de bord employeur pour le moment.</Panel>
       ) : report ? (
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <StatCard label="Offres actives" value={report.openJobs} />
-            <StatCard label="Candidatures reçues" value={report.totalApplicationsReceived} />
+            <StatCard label="Candidatures recues" value={report.totalApplicationsReceived} />
             <StatCard label="Taux d'acceptation" value={`${Math.round(report.acceptanceRate * 100)}%`} />
             <StatCard label="Moy. cand. / offre" value={report.averageApplicationsPerJob.toFixed(2)} />
           </div>
@@ -44,7 +46,9 @@ export function EmployerDashboard() {
             </div>
           </Panel>
         </>
-      ) : null}
+      ) : (
+        <Panel>Aucune donnee employeur disponible.</Panel>
+      )}
     </AppShell>
   );
 }

@@ -53,4 +53,7 @@ public class JobApplication {
 
     @Column(name = "employer_note", columnDefinition = "TEXT")
     private String employerNote;
+
+    @Column(name = "cv_file_path")
+    private String cvFilePath;
 }

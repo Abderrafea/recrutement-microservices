@@ -20,8 +20,8 @@ public class InternalApplicationController {
     private final ApplicationService applicationService;
 
     @GetMapping("/all")
-    public List<ApplicationResponse> getAllApplications(@RequestParam(required = false) Long candidateId,
-                                                         @RequestParam(required = false) Long jobId) {
+    public List<ApplicationResponse> getAllApplications(@RequestParam(name = "candidateId", required = false) Long candidateId,
+                                                         @RequestParam(name = "jobId", required = false) Long jobId) {
         return applicationService.getAllApplications(candidateId, jobId);
     }
 

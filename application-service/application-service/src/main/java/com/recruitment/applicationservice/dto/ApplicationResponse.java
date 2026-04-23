@@ -19,6 +19,7 @@ public record ApplicationResponse(
         ApplicationStatus status,
         LocalDateTime appliedAt,
         LocalDateTime updatedAt,
-        String employerNote
+        String employerNote,
+        String cvFileName
 ) {
 }

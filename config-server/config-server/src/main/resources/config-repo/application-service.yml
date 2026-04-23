@@ -20,6 +20,10 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:recruit}
     password: ${RABBITMQ_PASSWORD:recruit123}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   security:
     oauth2:
       resourceserver:
@@ -37,6 +41,9 @@ messaging:
       application-created: application.created
       application-status-changed: application.status.changed
       interview-reminder: interview.reminder
+
+storage:
+  cv-directory: ${APP_CV_STORAGE_DIR:uploads/applications/cv}
 
 eureka:
   client:

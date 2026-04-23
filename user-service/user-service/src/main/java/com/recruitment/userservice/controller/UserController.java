@@ -3,6 +3,7 @@ package com.recruitment.userservice.controller;
 import java.util.List;
 
 import com.recruitment.userservice.domain.Role;
+import com.recruitment.userservice.dto.user.ChangePasswordRequest;
 import com.recruitment.userservice.dto.user.UpdateUserProfileRequest;
 import com.recruitment.userservice.dto.user.UserProfileDto;
 import com.recruitment.userservice.dto.user.UserSummaryDto;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -51,7 +53,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UserProfileDto updateUser(@PathVariable Long id, @Valid @org.springframework.web.bind.annotation.RequestBody UpdateUserProfileRequest request) {
+    public UserProfileDto updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserProfileRequest request) {
         return userService.updateProfile(id, request);
     }
 
@@ -74,5 +76,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
+    }
+
+    @PutMapping("/{id}/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(@PathVariable Long id, @Valid @RequestBody ChangePasswordRequest request) {
+        userService.changePassword(id, request);
     }
 }

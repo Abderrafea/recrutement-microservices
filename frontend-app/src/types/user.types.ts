@@ -65,3 +65,8 @@ export interface UpdateProfilePayload {
   website?: string;
   industry?: string;
 }
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}

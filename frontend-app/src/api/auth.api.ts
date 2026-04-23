@@ -1,5 +1,6 @@
 import api from './axiosInstance';
 import type {
+  ChangePasswordPayload,
   LoginResponse,
   RegisterPayload,
   Role,
@@ -28,20 +29,15 @@ export async function updateProfile(userId: number, payload: UpdateProfilePayloa
   return data;
 }
 
-export async function uploadCv(userId: number, file: File) {
-  const formData = new FormData();
-  formData.append('file', file);
-  const { data } = await api.post<UserProfile>(`/api/users/${userId}/cv`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-  return data;
-}
-
 export async function listUsers(role?: Role) {
   const { data } = await api.get<UserSummary[]>('/api/users', {
     params: role ? { role } : undefined,
   });
   return data;
+}
+
+export async function changePassword(userId: number, payload: ChangePasswordPayload) {
+  await api.put(`/api/users/${userId}/password`, payload);
 }
 
 export async function deleteUser(userId: number) {
