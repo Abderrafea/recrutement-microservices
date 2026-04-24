@@ -127,6 +127,9 @@ public class UserService {
         if (!securityUtils.isSelfOrAdmin(userId)) {
             throw new UnauthorizedException("You are not allowed to delete this user");
         }
+        if (securityUtils.hasAnyRole(Role.ADMIN) && securityUtils.currentUserId().equals(userId)) {
+            throw new ValidationException("An admin cannot delete their own account");
+        }
         User user = findUser(userId);
         if (user.getRole() == Role.CANDIDATE) {
             candidateProfileRepository.findByUserId(userId).ifPresent(profile -> {

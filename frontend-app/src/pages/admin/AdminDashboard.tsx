@@ -1,10 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { Bar, BarChart, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { getApplicationsReport, getJobsReport, getOverview } from '../../api/reports.api';
 import { AppShell } from '../../components/layout/AppShell';
 import { Panel } from '../../components/common/Panel';
 import { Spinner } from '../../components/common/Spinner';
 import { StatCard } from '../../components/common/StatCard';
+
+const STATUS_COLORS: Record<string, string> = {
+  PENDING: '#c9694d',
+  REVIEWED: '#d9a441',
+  INTERVIEW: '#0f7d82',
+  ACCEPTED: '#4f7f4f',
+  REJECTED: '#9f4f5a',
+};
 
 export function AdminDashboard() {
   const overviewQuery = useQuery({ queryKey: ['reports', 'overview'], queryFn: getOverview });
@@ -22,6 +30,7 @@ export function AdminDashboard() {
   const overview = overviewQuery.data!;
   const jobs = jobsQuery.data!;
   const applications = applicationsQuery.data!;
+  const applicationsByStatus = Object.entries(applications.applicationsByStatus).map(([name, value]) => ({ name, value }));
 
   return (
     <AppShell eyebrow="Analytique admin" title="Vue d'ensemble de la plateforme">
@@ -38,7 +47,14 @@ export function AdminDashboard() {
           <div className="mt-6 h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={Object.entries(applications.applicationsByStatus).map(([name, value]) => ({ name, value }))} dataKey="value" nameKey="name" outerRadius={110} fill="#c9694d" />
+                <Pie data={applicationsByStatus} dataKey="value" nameKey="name" outerRadius={110}>
+                  {applicationsByStatus.map((entry, index) => (
+                    <Cell
+                      key={entry.name}
+                      fill={STATUS_COLORS[entry.name] ?? ['#c9694d', '#0f7d82', '#d9a441', '#4f7f4f', '#9f4f5a'][index % 5]}
+                    />
+                  ))}
+                </Pie>
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>

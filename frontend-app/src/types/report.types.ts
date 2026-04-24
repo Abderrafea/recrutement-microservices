@@ -32,8 +32,16 @@ export interface ApplicationStatisticsReport {
   totalApplications: number;
   applicationsByStatus: Record<string, number>;
   applicationsByJob: Record<string, number>;
+  applicationsByJobDetails?: JobApplicationsSummary[];
   acceptanceRate: number;
   generatedAt: string;
+}
+
+export interface JobApplicationsSummary {
+  jobId: number;
+  title: string;
+  company?: string | null;
+  totalApplications: number;
 }
 
 export interface JobPerformance {

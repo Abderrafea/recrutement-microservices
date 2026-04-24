@@ -14,6 +14,7 @@ import com.recruitment.reportingservice.client.UserServiceClient;
 import com.recruitment.reportingservice.dto.ApplicationStatisticsReportDto;
 import com.recruitment.reportingservice.dto.EmployerPerformanceDto;
 import com.recruitment.reportingservice.dto.EmployerReportDto;
+import com.recruitment.reportingservice.dto.JobApplicationsSummaryDto;
 import com.recruitment.reportingservice.dto.JobPerformanceDto;
 import com.recruitment.reportingservice.dto.JobStatisticsReportDto;
 import com.recruitment.reportingservice.dto.PlatformOverviewDto;
@@ -91,11 +92,27 @@ public class ReportingService {
     @Transactional(readOnly = true)
     public ApplicationStatisticsReportDto getApplicationsReport() {
         ensureAdmin();
+        List<JobServiceClient.JobSnapshot> jobs = jobServiceClient.getAllJobs(null);
         List<ApplicationServiceClient.ApplicationSnapshot> applications = applicationServiceClient.getAllApplications();
+        Map<Long, JobServiceClient.JobSnapshot> jobsById = jobs.stream()
+                .collect(Collectors.toMap(JobServiceClient.JobSnapshot::id, Function.identity(), (left, right) -> left));
+        Map<Long, Long> applicationsByJob = applications.stream()
+                .collect(Collectors.groupingBy(ApplicationServiceClient.ApplicationSnapshot::jobId, Collectors.counting()));
         ApplicationStatisticsReportDto report = new ApplicationStatisticsReportDto(
                 applications.size(),
                 groupApplicationsByStatus(applications),
-                applications.stream().collect(Collectors.groupingBy(ApplicationServiceClient.ApplicationSnapshot::jobId, Collectors.counting())),
+                applicationsByJob,
+                applicationsByJob.entrySet().stream()
+                        .sorted(Map.Entry.<Long, Long>comparingByValue().reversed())
+                        .map(entry -> {
+                            JobServiceClient.JobSnapshot job = jobsById.get(entry.getKey());
+                            return new JobApplicationsSummaryDto(
+                                    entry.getKey(),
+                                    job == null ? "Offre supprimée" : job.title(),
+                                    job == null ? null : job.company(),
+                                    entry.getValue());
+                        })
+                        .toList(),
                 acceptanceRate(applications),
                 LocalDateTime.now());
         return reportCacheService.cache("applications", report);
