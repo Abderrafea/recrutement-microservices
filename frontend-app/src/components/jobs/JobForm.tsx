@@ -52,14 +52,20 @@ export function JobForm({
     <Panel>
       <form
         className="grid gap-4 md:grid-cols-2"
-        onSubmit={handleSubmit((values) =>
+        onSubmit={handleSubmit((values) => {
+          // Backend expects LocalDateTime: "YYYY-MM-DDTHH:mm:ss"
+          // HTML datetime-local gives "YYYY-MM-DDTHH:mm" (no seconds) → add :00
+          const expiresAt = values.expiresAt
+            ? values.expiresAt.length === 16 ? `${values.expiresAt}:00` : values.expiresAt
+            : undefined;
+
           onSubmit({
             ...values,
             salary: values.salary || undefined,
-            expiresAt: values.expiresAt || undefined,
+            expiresAt,
             requiredSkills: values.requiredSkills.split(',').map((skill) => skill.trim()).filter(Boolean),
-          }),
-        )}
+          });
+        })}
       >
         <Input label="Intitulé du poste" error={errors.title?.message} {...register('title')} />
         <Input label="Localisation" error={errors.location?.message} {...register('location')} />

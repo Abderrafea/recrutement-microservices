@@ -56,4 +56,7 @@ public class JobApplication {
 
     @Column(name = "cv_file_path")
     private String cvFilePath;
+
+    @Column(name = "cover_letter_file_path")
+    private String coverLetterFilePath;
 }

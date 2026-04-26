@@ -13,7 +13,8 @@ public interface ApplicationMapper {
                                            String candidateCvUrl,
                                            String jobTitle,
                                            String company,
-                                           String cvFileName) {
+                                           String cvFileName,
+                                           String coverLetterFileName) {
         return new ApplicationResponse(
                 application.getId(),
                 application.getCandidateId(),
@@ -28,6 +29,7 @@ public interface ApplicationMapper {
                 application.getAppliedAt(),
                 application.getUpdatedAt(),
                 application.getEmployerNote(),
-                cvFileName);
+                cvFileName,
+                coverLetterFileName);
     }
 }

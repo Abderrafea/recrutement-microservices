@@ -4,7 +4,7 @@ COPY .mvn .mvn
 COPY mvnw mvnw
 COPY pom.xml pom.xml
 COPY src src
-RUN chmod +x mvnw && ./mvnw -q -Dmaven.test.skip=true package
+RUN chmod +x mvnw && ./mvnw -Dmaven.test.skip=true package
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app

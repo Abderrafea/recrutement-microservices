@@ -2,12 +2,9 @@ import api from './axiosInstance';
 import type { JobFormPayload, JobOffer, JobsPageResponse, JobSearchParams } from '../types/job.types';
 
 export async function getJobs(params: JobSearchParams = {}) {
-  if (params.query || params.location || params.contractType || params.experienceLevel || params.status) {
-    const { data } = await api.get<JobsPageResponse>('/api/jobs/search', { params });
-    return data;
-  }
-
-  const { data } = await api.get<JobsPageResponse>('/api/jobs', { params });
+  const hasFilter = params.query || params.location || params.contractType || params.experienceLevel || params.status;
+  const endpoint = hasFilter ? '/api/jobs/search' : '/api/jobs';
+  const { data } = await api.get<JobsPageResponse>(endpoint, { params });
   return data;
 }
 

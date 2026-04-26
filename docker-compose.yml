@@ -154,8 +154,10 @@ services:
       USER_SERVICE_URL: http://user-service:8081
       JOB_SERVICE_URL: http://job-service:8082
       APP_CV_STORAGE_DIR: /data/application-cv
+      APP_COVER_LETTER_STORAGE_DIR: /data/application-cover-letters
     volumes:
       - application_cv_data:/data/application-cv
+      - application_cover_letter_data:/data/application-cover-letters
     depends_on:
       config-server:
         condition: service_healthy
@@ -260,3 +262,4 @@ volumes:
   reporting_data:
   user_cv_data:
   application_cv_data:
+  application_cover_letter_data:

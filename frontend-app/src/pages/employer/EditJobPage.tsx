@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -11,13 +12,17 @@ export function EditJobPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const jobQuery = useJob(id);
+
   const updateMutation = useMutation({
     mutationFn: (payload: Parameters<typeof updateJob>[1]) => updateJob(id!, payload),
     onSuccess: () => {
       toast.success('Offre mise à jour.');
       navigate('/employer/jobs');
     },
-    onError: () => toast.error('Impossible de mettre à jour l\'offre.'),
+    onError: (error) => {
+      console.error('Update job error:', error);
+      toast.error('Impossible de mettre à jour l\'offre.');
+    },
   });
 
   return (
@@ -25,7 +30,12 @@ export function EditJobPage() {
       {jobQuery.isLoading || !jobQuery.data ? (
         <Spinner />
       ) : (
-        <JobForm defaultValues={jobQuery.data} isSubmitting={updateMutation.isPending} onSubmit={(payload) => updateMutation.mutate(payload)} />
+        <JobForm
+          key={jobQuery.data.id}
+          defaultValues={jobQuery.data}
+          isSubmitting={updateMutation.isPending}
+          onSubmit={(payload) => updateMutation.mutate(payload)}
+        />
       )}
     </AppShell>
   );

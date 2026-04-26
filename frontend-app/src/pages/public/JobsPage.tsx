@@ -1,4 +1,4 @@
-import { startTransition, useDeferredValue, useState } from 'react';
+import { useState } from 'react';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
@@ -11,8 +11,8 @@ import type { JobSearchParams } from '../../types/job.types';
 
 export function JobsPage() {
   const [filters, setFilters] = useState<JobSearchParams>({ page: 0, size: 9 });
-  const deferredQuery = useDeferredValue(filters.query);
-  const jobsQuery = useJobs({ ...filters, query: deferredQuery });
+  // Pass filters directly — no useDeferredValue / startTransition which can suppress React Query refetches
+  const jobsQuery = useJobs(filters);
 
   return (
     <PageWrapper>
@@ -24,11 +24,10 @@ export function JobsPage() {
             label="Mot-clé"
             placeholder="Rechercher par titre ou description"
             value={filters.query ?? ''}
-            onChange={(event) =>
-              startTransition(() => {
-                setFilters((current) => ({ ...current, query: event.target.value, page: 0 }));
-              })
-            }
+            onChange={(event) => {
+              const value = event.target.value;
+              setFilters((current) => ({ ...current, query: value || undefined, page: 0 }));
+            }}
           />
           <div className="flex items-end">
             <Button variant="secondary" onClick={() => setFilters((current) => ({ ...current, page: 0 }))}>
@@ -42,7 +41,7 @@ export function JobsPage() {
         <JobFilters filters={filters} setFilters={setFilters} />
 
         <div className="space-y-6">
-          {jobsQuery.isLoading ? (
+          {jobsQuery.isLoading || jobsQuery.isFetching ? (
             <Spinner />
           ) : jobsQuery.data?.content.length ? (
             <>

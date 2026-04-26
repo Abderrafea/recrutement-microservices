@@ -24,43 +24,66 @@ public class FileStorageService {
     private final StorageProperties storageProperties;
 
     private Path cvStorageDirectory;
+    private Path coverLetterStorageDirectory;
 
     @PostConstruct
     void init() {
         try {
             cvStorageDirectory = Paths.get(storageProperties.cvDirectory()).toAbsolutePath().normalize();
             Files.createDirectories(cvStorageDirectory);
+
+            String coverLetterDir = storageProperties.coverLetterDirectory() != null
+                    ? storageProperties.coverLetterDirectory()
+                    : storageProperties.cvDirectory() + "/cover-letters";
+            coverLetterStorageDirectory = Paths.get(coverLetterDir).toAbsolutePath().normalize();
+            Files.createDirectories(coverLetterStorageDirectory);
         } catch (IOException exception) {
-            throw new IllegalStateException("Unable to initialize application CV storage directory", exception);
+            throw new IllegalStateException("Unable to initialize application storage directories", exception);
         }
     }
 
     public String storeCv(Long applicationId, MultipartFile file) {
+        return storeFile(applicationId, file, cvStorageDirectory, "cv");
+    }
+
+    public String storeCoverLetter(Long applicationId, MultipartFile file) {
+        return storeFile(applicationId, file, coverLetterStorageDirectory, "cover-letter");
+    }
+
+    private String storeFile(Long applicationId, MultipartFile file, Path storageDir, String prefix) {
         if (file.isEmpty()) {
-            throw new ValidationException("Uploaded CV file is empty");
+            throw new ValidationException("Uploaded file is empty");
         }
 
-        String originalFilename = file.getOriginalFilename() == null ? "cv.pdf" : file.getOriginalFilename();
+        String originalFilename = file.getOriginalFilename() == null ? prefix + ".pdf" : file.getOriginalFilename();
         String extension = originalFilename.contains(".")
                 ? originalFilename.substring(originalFilename.lastIndexOf('.'))
                 : ".pdf";
         String safeExtension = extension.replaceAll("[^a-zA-Z0-9.]", "");
-        String storedFileName = "app-" + applicationId + "-" + UUID.randomUUID() + safeExtension;
-        Path target = cvStorageDirectory.resolve(storedFileName);
+        String storedFileName = "app-" + applicationId + "-" + prefix + "-" + UUID.randomUUID() + safeExtension;
+        Path target = storageDir.resolve(storedFileName);
 
         try {
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException exception) {
-            throw new IllegalStateException("Unable to store CV file", exception);
+            throw new IllegalStateException("Unable to store file", exception);
         }
 
         return target.toString();
     }
 
     public Resource loadCv(String path) {
+        return loadFile(path, "CV");
+    }
+
+    public Resource loadCoverLetter(String path) {
+        return loadFile(path, "Cover letter");
+    }
+
+    private Resource loadFile(String path, String label) {
         Path filePath = Paths.get(path).toAbsolutePath().normalize();
         if (!Files.exists(filePath)) {
-            throw new ResourceNotFoundException("CV file not found");
+            throw new ResourceNotFoundException(label + " file not found");
         }
         return new PathResource(filePath);
     }

@@ -35,9 +35,9 @@ public class ApplicationController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public ApplicationResponse apply(@RequestParam("jobId") Long jobId,
-                                     @RequestParam("coverLetter") String coverLetter,
+                                     @RequestPart("coverLetterFile") MultipartFile coverLetterFile,
                                      @RequestPart("cvFile") MultipartFile cvFile) {
-        return applicationService.apply(jobId, coverLetter, cvFile);
+        return applicationService.apply(jobId, coverLetterFile, cvFile);
     }
 
     @GetMapping("/{id}")
@@ -70,6 +70,16 @@ public class ApplicationController {
     @GetMapping("/{id}/cv")
     public ResponseEntity<Resource> downloadCv(@PathVariable Long id) {
         ApplicationService.DownloadedFile downloadedFile = applicationService.downloadCv(id);
+        return buildFileResponse(downloadedFile);
+    }
+
+    @GetMapping("/{id}/cover-letter")
+    public ResponseEntity<Resource> downloadCoverLetter(@PathVariable Long id) {
+        ApplicationService.DownloadedFile downloadedFile = applicationService.downloadCoverLetter(id);
+        return buildFileResponse(downloadedFile);
+    }
+
+    private ResponseEntity<Resource> buildFileResponse(ApplicationService.DownloadedFile downloadedFile) {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + downloadedFile.fileName() + "\"")

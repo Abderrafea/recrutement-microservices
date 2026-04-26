@@ -40,13 +40,13 @@ public class ApplicationService {
     private final FileStorageService fileStorageService;
 
     @Transactional
-    public ApplicationResponse apply(Long jobId, String coverLetter, MultipartFile cvFile) {
+    public ApplicationResponse apply(Long jobId, MultipartFile coverLetterFile, MultipartFile cvFile) {
         ensureRole("CANDIDATE");
         Long candidateId = securityUtils.currentUserId();
         if (jobApplicationRepository.existsByCandidateIdAndJobId(candidateId, jobId)) {
             throw new DuplicateApplicationException("Candidate " + candidateId + " has already applied to job " + jobId);
         }
-        validateApplicationInput(coverLetter, cvFile);
+        validateApplicationInput(coverLetterFile, cvFile);
 
         JobServiceClient.JobSnapshot job = jobServiceClient.getJob(jobId);
         if (!"OPEN".equals(job.status())) {
@@ -59,19 +59,29 @@ public class ApplicationService {
         UserServiceClient.CandidateSnapshot candidate = userServiceClient.getCandidate(candidateId);
         UserServiceClient.EmployerSnapshot employer = userServiceClient.getEmployer(job.employerId());
 
+        // Use original filename as cover letter text placeholder for backward compat
+        String coverLetterText = coverLetterFile.getOriginalFilename() != null
+                ? coverLetterFile.getOriginalFilename()
+                : "cover-letter";
+
         JobApplication application = jobApplicationRepository.save(JobApplication.builder()
                 .candidateId(candidateId)
                 .jobId(jobId)
-                .coverLetter(coverLetter.trim())
+                .coverLetter(coverLetterText)
                 .status(ApplicationStatus.PENDING)
                 .appliedAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build());
 
         String cvFilePath = null;
+        String coverLetterFilePath = null;
         try {
             cvFilePath = fileStorageService.storeCv(application.getId(), cvFile);
             application.setCvFilePath(cvFilePath);
+
+            coverLetterFilePath = fileStorageService.storeCoverLetter(application.getId(), coverLetterFile);
+            application.setCoverLetterFilePath(coverLetterFilePath);
+
             application = jobApplicationRepository.save(application);
 
             jobServiceClient.adjustApplicationCount(jobId, 1);
@@ -89,16 +99,10 @@ public class ApplicationService {
                     job.company(),
                     LocalDateTime.now()));
 
-            return applicationMapper.toResponse(
-                    application,
-                    candidate.fullName(),
-                    candidate.email(),
-                    candidate.cvUrl(),
-                    job.title(),
-                    job.company(),
-                    fileStorageService.resolveFileName(application.getCvFilePath()));
+            return toFullResponse(application, candidate, job);
         } catch (RuntimeException exception) {
             fileStorageService.deleteIfExists(cvFilePath);
+            fileStorageService.deleteIfExists(coverLetterFilePath);
             throw exception;
         }
     }
@@ -173,7 +177,8 @@ public class ApplicationService {
                 candidate.cvUrl(),
                 job.title(),
                 job.company(),
-                fileStorageService.resolveFileName(saved.getCvFilePath()));
+                fileStorageService.resolveFileName(saved.getCvFilePath()),
+                fileStorageService.resolveFileName(saved.getCoverLetterFilePath()));
     }
 
     @Transactional
@@ -186,6 +191,7 @@ public class ApplicationService {
             throw new ValidationException("Only pending applications can be withdrawn");
         }
         fileStorageService.deleteIfExists(application.getCvFilePath());
+        fileStorageService.deleteIfExists(application.getCoverLetterFilePath());
         jobApplicationRepository.delete(application);
         jobServiceClient.adjustApplicationCount(application.getJobId(), -1);
     }
@@ -200,6 +206,18 @@ public class ApplicationService {
 
         Resource resource = fileStorageService.loadCv(application.getCvFilePath());
         return new DownloadedFile(resource, fileStorageService.resolveFileName(application.getCvFilePath()));
+    }
+
+    @Transactional(readOnly = true)
+    public DownloadedFile downloadCoverLetter(Long applicationId) {
+        JobApplication application = findApplication(applicationId);
+        authorizeDownload(application);
+        if (application.getCoverLetterFilePath() == null || application.getCoverLetterFilePath().isBlank()) {
+            throw new ResourceNotFoundException("No cover letter found for this application");
+        }
+
+        Resource resource = fileStorageService.loadCoverLetter(application.getCoverLetterFilePath());
+        return new DownloadedFile(resource, fileStorageService.resolveFileName(application.getCoverLetterFilePath()));
     }
 
     @Transactional(readOnly = true)
@@ -225,6 +243,12 @@ public class ApplicationService {
     private ApplicationResponse enrich(JobApplication application) {
         UserServiceClient.CandidateSnapshot candidate = userServiceClient.getCandidate(application.getCandidateId());
         JobServiceClient.JobSnapshot job = jobServiceClient.getJob(application.getJobId());
+        return toFullResponse(application, candidate, job);
+    }
+
+    private ApplicationResponse toFullResponse(JobApplication application,
+                                               UserServiceClient.CandidateSnapshot candidate,
+                                               JobServiceClient.JobSnapshot job) {
         return applicationMapper.toResponse(
                 application,
                 candidate.fullName(),
@@ -232,7 +256,8 @@ public class ApplicationService {
                 candidate.cvUrl(),
                 job.title(),
                 job.company(),
-                fileStorageService.resolveFileName(application.getCvFilePath()));
+                fileStorageService.resolveFileName(application.getCvFilePath()),
+                fileStorageService.resolveFileName(application.getCoverLetterFilePath()));
     }
 
     private ApplicationResponse toInternalResponse(JobApplication application) {
@@ -243,21 +268,27 @@ public class ApplicationService {
                 null,
                 null,
                 null,
-                fileStorageService.resolveFileName(application.getCvFilePath()));
+                fileStorageService.resolveFileName(application.getCvFilePath()),
+                fileStorageService.resolveFileName(application.getCoverLetterFilePath()));
     }
 
-    private void validateApplicationInput(String coverLetter, MultipartFile cvFile) {
-        if (coverLetter == null || coverLetter.isBlank()) {
-            throw new ValidationException("Cover letter is required");
+    private void validateApplicationInput(MultipartFile coverLetterFile, MultipartFile cvFile) {
+        if (coverLetterFile == null || coverLetterFile.isEmpty()) {
+            throw new ValidationException("A cover letter file is required to apply");
         }
+        validateFileExtension(coverLetterFile, "Cover letter");
+
         if (cvFile == null || cvFile.isEmpty()) {
             throw new ValidationException("A CV file is required to apply");
         }
+        validateFileExtension(cvFile, "CV");
+    }
 
-        String originalName = cvFile.getOriginalFilename();
+    private void validateFileExtension(MultipartFile file, String label) {
+        String originalName = file.getOriginalFilename();
         String normalizedName = originalName == null ? "" : originalName.toLowerCase();
         if (!(normalizedName.endsWith(".pdf") || normalizedName.endsWith(".doc") || normalizedName.endsWith(".docx"))) {
-            throw new ValidationException("CV files must be PDF, DOC, or DOCX");
+            throw new ValidationException(label + " files must be PDF, DOC, or DOCX");
         }
     }
 
@@ -294,7 +325,7 @@ public class ApplicationService {
             }
         }
 
-        throw new UnauthorizedException("You are not allowed to download this CV");
+        throw new UnauthorizedException("You are not allowed to download this file");
     }
 
     private void ensureRole(String role) {

@@ -16,3 +16,4 @@ management:
 
 storage:
   cv-directory: ${APP_CV_STORAGE_DIR:uploads/applications/cv}
+  cover-letter-directory: ${APP_COVER_LETTER_STORAGE_DIR:uploads/applications/cover-letters}

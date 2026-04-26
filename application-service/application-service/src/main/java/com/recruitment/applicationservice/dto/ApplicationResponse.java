@@ -20,6 +20,7 @@ public record ApplicationResponse(
         LocalDateTime appliedAt,
         LocalDateTime updatedAt,
         String employerNote,
-        String cvFileName
+        String cvFileName,
+        String coverLetterFileName
 ) {
 }

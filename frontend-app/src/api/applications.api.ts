@@ -4,7 +4,7 @@ import type { Application, ApplyPayload, StatusUpdatePayload } from '../types/ap
 export async function applyToJob(payload: ApplyPayload) {
   const formData = new FormData();
   formData.append('jobId', String(payload.jobId));
-  formData.append('coverLetter', payload.coverLetter);
+  formData.append('coverLetterFile', payload.coverLetterFile);
   formData.append('cvFile', payload.cvFile);
 
   const { data } = await api.post<Application>('/api/applications', formData, {
@@ -38,9 +38,15 @@ export async function withdrawApplication(applicationId: number) {
 }
 
 export async function downloadApplicationCv(applicationId: number, fallbackFileName: string) {
-  const response = await api.get<Blob>(`/api/applications/${applicationId}/cv`, {
-    responseType: 'blob',
-  });
+  await downloadFile(`/api/applications/${applicationId}/cv`, fallbackFileName);
+}
+
+export async function downloadApplicationCoverLetter(applicationId: number, fallbackFileName: string) {
+  await downloadFile(`/api/applications/${applicationId}/cover-letter`, fallbackFileName);
+}
+
+async function downloadFile(url: string, fallbackFileName: string) {
+  const response = await api.get<Blob>(url, { responseType: 'blob' });
 
   const dispositionHeader = response.headers['content-disposition'];
   const matchedFileName = dispositionHeader?.match(/filename="?(?<name>[^"]+)"?/);
